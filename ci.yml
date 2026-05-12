@@ -1,0 +1,78 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+
+  # ─────────────────────────────────────────────
+  # JOB 1: Rulare teste + Coverage
+  # ─────────────────────────────────────────────
+  test-and-coverage:
+    name: Tests & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run all tests
+        run: pytest tests/ -v
+
+      - name: Run coverage (branch coverage)
+        run: |
+          coverage run --branch -m pytest tests/
+          coverage report -m --fail-under=80
+          coverage html
+
+      - name: Upload HTML coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: htmlcov/
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Mutation Testing (opțional)
+  # ─────────────────────────────────────────────
+  mutation-testing:
+    name: Mutation Testing (cosmic-ray)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Init cosmic-ray session
+        run: |
+          cosmic-ray init cosmic-ray.toml session.sqlite
+          cosmic-ray exec cosmic-ray.toml session.sqlite
+
+      - name: Generate mutation report
+        run: cr-report session.sqlite > mutation_report.txt
+        continue-on-error: true
+
+      - name: Upload mutation report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: mutation_report.txt
