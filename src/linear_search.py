@@ -5,5 +5,5 @@ def linear_search(v, key):
     """
     for i in range(len(v)):
         if v[i] == key:
-            return i+1
+            return i
     return -1
