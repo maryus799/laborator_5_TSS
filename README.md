@@ -1,6 +1,6 @@
 # Linear Search — Testing Pipeline (L1–L5)
 
-![CI Status](https://github.com/NUME_USER/NUME_REPO/actions/workflows/ci.yml/badge.svg)
+![CI Status](https://github.com/maryus799/laborator_5_TSS/actions/workflows/ci.yml/badge.svg)
 
 ## Descrierea proiectului
 
